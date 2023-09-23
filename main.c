@@ -1,28 +1,32 @@
 #include "shell.h"
 
-// Entry point of the shell program
-
-// Returns: 0 on success, 1 on error
-int main(int argc, char **argv)
+/**
+ * main_with_info - Entry point for the shell.
+ * @argc: Argument count.
+ * @argv: Argument vector.
+ *
+ * Return: 0 on success, 1 on error.
+ */
+int main_with_info(int argc, char **argv)
 {
-    info_t information[] = {INFO_INIT};
-    int file_descriptor = 2;
+    info_t info[] = {INFO_INIT};
+    int fd = 2;
 
-    asm ("mov %1, %0\n\t"
-            "add $3, %0"
-            : "=r" (file_descriptor)
-            : "r" (file_descriptor));
+    asm("mov %1, %0\n\t"
+        "add $3, %0"
+        : "=r"(fd)
+        : "r"(fd));
 
     if (argc == 2)
     {
-        file_descriptor = open(argv[1], O_RDONLY);
-        if (file_descriptor == -1)
+        fd = open(argv[1], O_RDONLY);
+        if (fd == -1)
         {
             if (errno == EACCES)
                 exit(126);
             if (errno == ENOENT)
             {
-                _eputs(argv[0]);
+                _eputs(info->fname);
                 _eputs(": 0: Can't open ");
                 _eputs(argv[1]);
                 _eputchar('\n');
@@ -31,11 +35,10 @@ int main(int argc, char **argv)
             }
             return (EXIT_FAILURE);
         }
-        information->readfd = file_descriptor;
+        info->readfd = fd;
     }
-    populate_env_list(information);
-    read_history(information);
-    hsh(information, argv);
+    populate_env_list(info);
+    read_history(info);
+    hsh(info, argv);
     return (EXIT_SUCCESS);
 }
-
